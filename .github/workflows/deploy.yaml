@@ -1,0 +1,43 @@
+name: Deploy MIG
+
+on:
+  repository_dispatch:
+    types: [deploy-wordpress]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iac-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate payload
+        run: |
+          test -n "${{ github.event.client_payload.image_ref }}" || { echo "image_ref missing"; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.ref || 'main' }}
+
+      - name: Auth with JSON key
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: mig
+        run: terraform init -input=false
+
+      - name: Terraform Apply
+        working-directory: mig
+        env:
+          IMAGE_REF: ${{ github.event.client_payload.image_ref }}
+        run: terraform apply -auto-approve -input=false -var="container_image=${IMAGE_REF}"
