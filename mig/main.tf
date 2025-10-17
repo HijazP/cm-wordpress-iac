@@ -19,17 +19,6 @@ provider "google" {
   region  = var.gcp_region
 }
 
-# Reserve a global static IP for the HTTP(S) Load Balancer so the IP stays constant
-resource "google_compute_global_address" "lb_ip" {
-  name       = "wp-prod-http-lb-address"
-  project    = var.gcp_project_id
-  ip_version = "IPV4"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 # Read Cloud SQL outputs from its remote state so credentials stay in sync
 data "terraform_remote_state" "cloud_sql" {
   backend = "gcs"
@@ -177,9 +166,6 @@ module "lb_http" {
   firewall_projects = [var.gcp_project_id]
   target_tags       = ["wp-prod-vm"]
 
-  # Use the reserved static IP; disable module-managed address creation
-  create_address = false
-  address        = google_compute_global_address.lb_ip.address
 
   backends = {
     default = {
