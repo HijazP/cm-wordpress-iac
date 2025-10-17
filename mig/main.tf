@@ -68,6 +68,12 @@ resource "google_compute_instance_template" "wordpress_template" {
   metadata = {
     startup-script = <<-EOT
       #!/bin/bash
+
+      SITE_URL="http://$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
+      SITE_TITLE="Situs Uji Coba Otomatis"
+      ADMIN_USER="admin"
+      ADMIN_PASSWORD="YourStrongPasswordHere"
+      ADMIN_EMAIL="admin@example.com"
       
       # Start WordPress container and configure WP-Stateless via WORDPRESS_CONFIG_EXTRA
       docker run -d -p 80:80 \
@@ -84,18 +90,21 @@ resource "google_compute_instance_template" "wordpress_template" {
       --name wordpress \
       ${var.container_image}
 
-      # Wait for WordPress readiness using short-lived wordpress:cli container
-      for i in {1..30}; do
-        if docker run --rm --network container:wordpress --volumes-from wordpress wordpress:cli \
-          wp core is-installed --allow-root --path=/var/www/html; then
-          break
-        fi
-        sleep 5
-      done
+      sleep 30
+
+      # Core install
+      docker exec wordpress wp core install \
+        --url="$SITE_URL" \
+        --title="$SITE_TITLE" \
+        --admin_user="$ADMIN_USER" \
+        --admin_password="$ADMIN_PASSWORD" \
+        --admin_email="$ADMIN_EMAIL" \
+        --skip-email \
+        --allow-root --path=/var/www/html
 
       # Activate all plugins using wordpress:cli against the running container
-      docker run --rm --network container:wordpress --volumes-from wordpress wordpress:cli \
-        wp plugin activate --all --allow-root --path=/var/www/html || true
+      docker exec wordpress wp plugin activate --all \
+        --allow-root --path=/var/www/html
     EOT
   }
 
