@@ -1,0 +1,25 @@
+gcp_project_id = "your-project-id"
+gcp_region     = "asia-southeast1"
+gcp_zone       = "asia-southeast1-a"
+
+# Get these values from VPC terraform outputs
+network_name    = "wp-prod-vpc-network"
+subnetwork_name = "wp-prod-subnet-main"
+
+# Get these values from Cloud SQL terraform outputs
+db_host     = "10.x.x.x"  # private IP of Cloud SQL instance
+db_user     = "wp_admin"
+db_password = "your-generated-password"  # from Cloud SQL terraform output
+db_name     = "wordpress"
+
+# Cloud Storage configuration
+storage_bucket_name = "wp-prod-uploads-bucket"  # Must be globally unique
+
+# WP-Stateless configuration
+wp_stateless_mode      = "stateless"  # or "cdn", "backup"
+wp_stateless_root_dir  = "uploads"
+
+# Container image (built by GitHub Actions and pushed to GHCR)
+# Use a specific tag from your repo, e.g., ghcr.io/OWNER/REPO:main or :sha-xxxx
+container_image = "ghcr.io/OWNER/REPO:main"
+

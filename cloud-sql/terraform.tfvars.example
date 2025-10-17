@@ -1,0 +1,7 @@
+gcp_project_id = "your-project-id"
+gcp_region     = "asia-southeast1"
+gcp_zone       = "asia-southeast1-a"
+
+network_name           = "wp-prod-vpc-network"
+private_vpc_connection = "servicenetworking.googleapis.com"
+
