@@ -90,21 +90,21 @@ resource "google_compute_instance_template" "wordpress_template" {
       --name wordpress \
       ${var.container_image}
 
-      sleep 30
+      # sleep 30
 
-      # Core install
-      docker exec wordpress wp core install \
-        --url="$SITE_URL" \
-        --title="$SITE_TITLE" \
-        --admin_user="$ADMIN_USER" \
-        --admin_password="$ADMIN_PASSWORD" \
-        --admin_email="$ADMIN_EMAIL" \
-        --skip-email \
-        --allow-root --path=/var/www/html
+      # # Core install
+      # docker exec wordpress wp core install \
+      #   --url="$SITE_URL" \
+      #   --title="$SITE_TITLE" \
+      #   --admin_user="$ADMIN_USER" \
+      #   --admin_password="$ADMIN_PASSWORD" \
+      #   --admin_email="$ADMIN_EMAIL" \
+      #   --skip-email \
+      #   --allow-root --path=/var/www/html
 
-      # Activate all plugins using wordpress:cli against the running container
-      docker exec wordpress wp plugin activate --all \
-        --allow-root --path=/var/www/html
+      # # Activate all plugins using wordpress:cli against the running container
+      # docker exec wordpress wp plugin activate --all \
+      #   --allow-root --path=/var/www/html
     EOT
   }
 
